@@ -85,12 +85,16 @@ List all non-countries.
 
 ```{python}
 run_sql_and_return_html(cnx,"""
-select
-  *
-from
+SELECT
+  country_short_name  AS "Short Name",
+  country_income_category AS "Income Category"
+FROM
   world_bank_data.wdi_country
-where
+WHERE
   country_region IS NULL
+  OR country_region = ''
+ORDER BY
+  country_short_name;
 """)
 ```
 
@@ -101,10 +105,12 @@ Create your own copy of WDI_Country containing just countries.
 ```{python}
 execute_ddl(cnx,"""
 DROP TABLE IF EXISTS wdi_country;
+
 CREATE TABLE wdi_country AS
 SELECT *
 FROM world_bank_data.wdi_country
-WHERE country_region IS NOT NULL;
+WHERE country_region IS NOT NULL
+  AND country_region <> '';
 """)
 ```
 
@@ -130,8 +136,10 @@ According to the World Bank, in 2020 there were how many countries in the world?
 ## (skills: select, aggregate)
 
 run_sql_and_return_html(cnx,"""
-SELECT COUNT(*) AS "Country Count in 2020"
-FROM wdi_country;
+SELECT
+  COUNT(*) AS "Country Count in 2020"
+FROM
+  wdi_country;
 """)
 
 ```
@@ -142,9 +150,12 @@ What are all unique values of region in the wdi_country table?
 
 ```{python}
 run_sql_and_return_html(cnx,"""
-SELECT DISTINCT country_region AS "Unique Regions"
-FROM wdi_country
-ORDER BY country_region;
+SELECT DISTINCT
+  country_region AS "Unique Regions"
+FROM
+  wdi_country
+ORDER BY
+  country_region;
 """)
 
 ```
@@ -155,14 +166,14 @@ How many countries are in each region?
 
 ```{python}
 run_sql_and_return_html(cnx,"""
-SELECT 
+SELECT
   country_region AS "Region",
-  COUNT(*) AS "Number of Countries"
-FROM 
+  COUNT(*)         AS "Number of Countries"
+FROM
   wdi_country
-GROUP BY 
+GROUP BY
   country_region
-ORDER BY 
+ORDER BY
   COUNT(*) DESC;
 """)
 ```
@@ -173,14 +184,14 @@ List the country full names and regions for all countries in north america.
 
 ```{python}
 run_sql_and_return_html(cnx,"""
-SELECT 
+SELECT
   country_full_name AS "Country",
-  country_region AS "Region"
-FROM 
+  country_region    AS "Region"
+FROM
   wdi_country
-WHERE 
+WHERE
   country_region = 'North America'
-ORDER BY 
+ORDER BY
   country_full_name;
 """)
 ```
@@ -189,14 +200,14 @@ ORDER BY
 
 ```{python}
 run_sql_and_return_html(cnx,"""
-SELECT 
-  country_region AS "Region",
+SELECT
   country_short_name AS "Short Name",
-  country_full_name AS "Full Name"
-FROM 
+  country_region     AS "Region"
+FROM
   wdi_country
-WHERE 
-  country_short_name = 'Qatar' OR country_full_name LIKE '%Qatar%';
+WHERE
+  country_short_name = 'Qatar'
+   OR country_full_name LIKE '%Qatar%';
 """)
 ```
 
@@ -204,18 +215,14 @@ WHERE
 
 ```{python}
 run_sql_and_return_html(cnx,"""
-SELECT 
-  country_code,
-  country_short_name,
-  country_abbr,
-  country_wb_abbr,
-  country_region
-FROM 
+SELECT
+  country_short_name AS "Short Name"
+FROM
   wdi_country
-WHERE 
-  country_abbr != country_wb_abbr
-ORDER BY 
-  country_region, country_short_name;
+WHERE
+  country_abbr   <> country_wb_abbr
+ORDER BY
+  country_short_name;
 """)
 ```
 
@@ -223,14 +230,20 @@ ORDER BY
 
 ```{python}
 run_sql_and_return_html(cnx,"""
-SELECT 
-  country_income_category AS "Income Category",
-  COUNT(*) AS "Number of Countries"
-FROM 
+SELECT
+  CASE
+    WHEN country_income_category = '' THEN 'NULL'
+    ELSE country_income_category
+  END            AS "Income Category",
+  COUNT(*)       AS "Number of Countries"
+FROM
   wdi_country
-GROUP BY 
-  country_income_category
-ORDER BY 
+GROUP BY
+  CASE
+    WHEN country_income_category = '' THEN 'NULL'
+    ELSE country_income_category
+  END
+ORDER BY
   COUNT(*) DESC;
 """)
 ```
@@ -239,15 +252,16 @@ ORDER BY
 
 ```{python}
 run_sql_and_return_html(cnx,"""
-SELECT 
-  country_short_name,
-  country_income_category,
-  country_region
-FROM 
+SELECT
+  country_short_name AS "Country",
+  country_income_category AS "Income Category",
+  country_region AS "Region"
+FROM
   wdi_country
-WHERE 
-  country_income_category = ''
-ORDER BY 
+WHERE
+  country_income_category IS NULL
+  OR country_income_category = ''
+ORDER BY
   country_short_name;
 """)
 ```
@@ -255,23 +269,27 @@ ORDER BY
 ## Task 13
 
 ```{python}
-execute_ddl(cnx,"""
+execute_ddl(cnx, """
 UPDATE wdi_country
 SET country_income_category = 'High income'
-WHERE country_short_name = 'Qatar' AND country_income_category = '';
+WHERE country_short_name = 'Qatar'
+  AND (country_income_category IS NULL OR country_income_category = '');
 """)
 
 ```
 ```{python}
-run_sql_and_return_html(cnx,"""
-SELECT 
-  country_short_name,
-  country_income_category,
-  country_region
-FROM 
+run_sql_and_return_html(cnx, """
+SELECT
+  country_short_name AS "Country",
+  country_income_category AS "Income Category",
+  country_region AS "Region"
+FROM
   wdi_country
-WHERE 
-  country_short_name = 'Qatar';
+WHERE
+  country_income_category IS NULL
+  OR country_income_category = ''
+ORDER BY
+  country_short_name;
 """)
 
 ```

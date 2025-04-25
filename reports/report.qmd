@@ -84,17 +84,14 @@ limit 5
 List all non-countries.
 
 ```{python}
-run_sql_and_return_html(cnx,"""
+run_sql_and_return_html(cnx, """
 SELECT
-  country_short_name  AS "Short Name",
+  country_short_name    AS "Short Name",
   country_income_category AS "Income Category"
-FROM
-  world_bank_data.wdi_country
-WHERE
-  country_region IS NULL
-  OR country_region = ''
-ORDER BY
-  country_short_name;
+FROM world_bank_data.wdi_country
+WHERE country_region IS NULL
+   OR country_region = ''
+ORDER BY country_short_name;
 """)
 ```
 
@@ -103,19 +100,18 @@ ORDER BY
 Create your own copy of WDI_Country containing just countries.
 
 ```{python}
-execute_ddl(cnx,"""
+execute_ddl(cnx, """
 DROP TABLE IF EXISTS wdi_country;
-
 CREATE TABLE wdi_country AS
-SELECT *
-FROM world_bank_data.wdi_country
-WHERE country_region IS NOT NULL
-  AND country_region <> '';
+  SELECT *
+  FROM world_bank_data.wdi_country
+  WHERE country_region IS NOT NULL
+    AND country_region <> '';
 """)
 ```
 
 ```{python}
-run_sql_and_return_html(cnx,"""
+run_sql_and_return_html(cnx, """
 SELECT COUNT(*) AS "Row Count"
 FROM wdi_country;
 """)
@@ -135,11 +131,10 @@ According to the World Bank, in 2020 there were how many countries in the world?
 ```{python}
 ## (skills: select, aggregate)
 
-run_sql_and_return_html(cnx,"""
+run_sql_and_return_html(cnx, """
 SELECT
   COUNT(*) AS "Country Count in 2020"
-FROM
-  wdi_country;
+FROM wdi_country;
 """)
 
 ```
@@ -149,13 +144,11 @@ FROM
 What are all unique values of region in the wdi_country table?
 
 ```{python}
-run_sql_and_return_html(cnx,"""
+run_sql_and_return_html(cnx, """
 SELECT DISTINCT
   country_region AS "Unique Regions"
-FROM
-  wdi_country
-ORDER BY
-  country_region;
+FROM wdi_country
+ORDER BY country_region;
 """)
 
 ```
@@ -165,16 +158,13 @@ ORDER BY
 How many countries are in each region?
 
 ```{python}
-run_sql_and_return_html(cnx,"""
+run_sql_and_return_html(cnx, """
 SELECT
-  country_region AS "Region",
-  COUNT(*)         AS "Number of Countries"
-FROM
-  wdi_country
-GROUP BY
-  country_region
-ORDER BY
-  COUNT(*) DESC;
+  country_region       AS "Region",
+  COUNT(*)             AS "Number of Countries"
+FROM wdi_country
+GROUP BY country_region
+ORDER BY COUNT(*) DESC;
 """)
 ```
 
@@ -183,86 +173,69 @@ ORDER BY
 List the country full names and regions for all countries in north america.
 
 ```{python}
-run_sql_and_return_html(cnx,"""
+run_sql_and_return_html(cnx, """
 SELECT
   country_full_name AS "Country",
   country_region    AS "Region"
-FROM
-  wdi_country
-WHERE
-  country_region = 'North America'
-ORDER BY
-  country_full_name;
+FROM wdi_country
+WHERE country_region = 'North America'
+ORDER BY country_full_name;
 """)
 ```
 
 ## Task 9
 
 ```{python}
-run_sql_and_return_html(cnx,"""
+run_sql_and_return_html(cnx, """
 SELECT
   country_short_name AS "Short Name",
   country_region     AS "Region"
-FROM
-  wdi_country
-WHERE
-  country_short_name = 'Qatar'
-   OR country_full_name LIKE '%Qatar%';
+FROM wdi_country
+WHERE country_short_name = 'Qatar'
+   OR country_full_name  LIKE '%Qatar%';
 """)
 ```
 
 ## Task 10
 
 ```{python}
-run_sql_and_return_html(cnx,"""
+run_sql_and_return_html(cnx, """
 SELECT
   country_short_name AS "Short Name"
-FROM
-  wdi_country
-WHERE
-  country_abbr   <> country_wb_abbr
-ORDER BY
-  country_short_name;
+FROM wdi_country
+WHERE country_abbr   <> country_wb_abbr
+ORDER BY country_short_name;
 """)
 ```
 
 ## Task 11
 
 ```{python}
-run_sql_and_return_html(cnx,"""
+run_sql_and_return_html(cnx, """
 SELECT
-  CASE
-    WHEN country_income_category = '' THEN 'NULL'
-    ELSE country_income_category
-  END            AS "Income Category",
-  COUNT(*)       AS "Number of Countries"
-FROM
-  wdi_country
+  CASE WHEN country_income_category = '' THEN 'NULL'
+       ELSE country_income_category END AS "Income Category",
+  COUNT(*)                               AS "Number of Countries"
+FROM wdi_country
 GROUP BY
-  CASE
-    WHEN country_income_category = '' THEN 'NULL'
-    ELSE country_income_category
-  END
-ORDER BY
-  COUNT(*) DESC;
+  CASE WHEN country_income_category = '' THEN 'NULL'
+       ELSE country_income_category END
+ORDER BY COUNT(*) DESC;
 """)
 ```
 
 ## Task 12
 
 ```{python}
-run_sql_and_return_html(cnx,"""
+run_sql_and_return_html(cnx, """
 SELECT
-  country_short_name AS "Country",
+  country_short_name      AS "Country",
   country_income_category AS "Income Category",
-  country_region AS "Region"
-FROM
-  wdi_country
-WHERE
-  country_income_category IS NULL
-  OR country_income_category = ''
-ORDER BY
-  country_short_name;
+  country_region          AS "Region"
+FROM wdi_country
+WHERE country_income_category IS NULL
+   OR country_income_category = ''
+ORDER BY country_short_name;
 """)
 ```
 
@@ -280,16 +253,13 @@ WHERE country_short_name = 'Qatar'
 ```{python}
 run_sql_and_return_html(cnx, """
 SELECT
-  country_short_name AS "Country",
+  country_short_name      AS "Country",
   country_income_category AS "Income Category",
-  country_region AS "Region"
-FROM
-  wdi_country
-WHERE
-  country_income_category IS NULL
-  OR country_income_category = ''
-ORDER BY
-  country_short_name;
+  country_region          AS "Region"
+FROM wdi_country
+WHERE country_income_category IS NULL
+   OR country_income_category = ''
+ORDER BY country_short_name;
 """)
 
 ```
